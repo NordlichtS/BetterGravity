@@ -32,12 +32,12 @@ import argparse
 from datetime import datetime
 
 # ==============================================================================
-# 全局可调配置常量 (Global Configuration Constants)
-# 用户可在此根据个人偏好调整轮询间隔与自动退出灵敏度
+# Global Configuration Constants
+# Adjust polling cadence and auto-termination sensitivity here as needed
 # ==============================================================================
-CHECK_INTERVAL_SECONDS = 5.0     # 统一轮询间隔（秒）：每隔多少秒执行一次“活跃检测 + 余额配额同步”
-MAX_INACTIVE_STRIKES = 2        # 连续无活动次数上限：连续多少次检测到对话未在运行后自动退出进程
-ACTIVE_WINDOW_SECONDS = 8.0     # 判定活跃的时间窗口（秒）：最后一次文件写入距离当前小于该值视为活跃
+CHECK_INTERVAL_SECONDS = 5.0     # Unified check interval (seconds): checks session activity + syncs live quota
+MAX_INACTIVE_STRIKES = 2        # Max consecutive inactive checks before auto-terminating the watcher process
+ACTIVE_WINDOW_SECONDS = 8.0     # Activity window (seconds): session is active if modified within this window
 
 STATE_DIR = os.path.expanduser(r"~\.gemini\config\plugins\budget-orchestrator")
 LOG_FILE = os.path.join(STATE_DIR, "watcher.log")
@@ -341,10 +341,10 @@ def run_watcher(convo_id=None, target_model_prefix=None, workspace_dir=None):
                                 log(f"Tracking [{grp_name} - {b_name}]: {rem_pct:.1f}% (Step {curr_step})")
                             elif curr_step > buckets_state[b_id]:
                                 is_danger = rem_pct <= danger_threshold
-                                title = f"Antigravity 额度消耗提醒 ({grp_name})"
+                                title = f"Antigravity Quota Notice ({grp_name})"
                                 if is_danger:
-                                    title = f"⚠️ [危险线停车预警] {grp_name} 配额严重不足!"
-                                    desc = f"【最后3次警戒区】{b_name} 剩余 {rem_pct:.1f}%！请在最近安全代码闭合点存盘收敛。"
+                                    title = f"[DANGER: SAFE PARK ALERT] {grp_name} Low Quota!"
+                                    desc = f"[Final 3 Steps] {b_name} remaining: {rem_pct:.1f}%. Please converge and save checkpoint at the next safe boundary."
                                     if workspace_dir and os.path.exists(workspace_dir):
                                         try:
                                             with open(os.path.join(workspace_dir, ".danger_parking_alert"), "w", encoding="utf-8") as f:
@@ -352,7 +352,7 @@ def run_watcher(convo_id=None, target_model_prefix=None, workspace_dir=None):
                                         except Exception:
                                             pass
                                 else:
-                                    desc = f"{b_name} 消耗达新台阶，当前剩余 {rem_pct:.1f}%。"
+                                    desc = f"{b_name} step threshold reached. Remaining: {rem_pct:.1f}%."
 
                                 show_toast(title, desc, is_danger=is_danger)
                                 buckets_state[b_id] = curr_step
