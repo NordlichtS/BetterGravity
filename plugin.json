@@ -1,6 +1,6 @@
 {
   "name": "budget-orchestrator",
-  "description": "Global Antigravity Quota Guard, Subagent Orchestrator, and Auto-Checkpoint System",
-  "version": "1.0.0",
+  "description": "Global Antigravity Quota Guard, Subagent Orchestrator, Auto-Checkpoint, and Local Skill Router",
+  "version": "1.1.0",
   "author": "Antigravity Pair"
 }

@@ -16,7 +16,7 @@ Copy-Item -Path (Join-Path $sourceDir "plugin.json") -Destination $targetDir -Fo
 Copy-Item -Path (Join-Path $sourceDir "rules") -Destination $targetDir -Recurse -Force
 Copy-Item -Path (Join-Path $sourceDir "scripts") -Destination $targetDir -Recurse -Force
 
-# Clean runtime logs in target if any
+# Clean runtime caches/logs in target if any
 $unneeded = @(
     (Join-Path $targetDir "scripts\__pycache__"),
     (Join-Path $targetDir "quota_watcher_state.json"),
@@ -28,5 +28,14 @@ foreach ($item in $unneeded) {
     }
 }
 
+# Build initial offline skill index if Python is available
+$pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+if ($pythonCmd) {
+    Write-Host ">>> Building initial offline local skill index..." -ForegroundColor Cyan
+    & $pythonCmd.Source (Join-Path $targetDir "scripts\skill_find.py") rebuild
+} else {
+    Write-Host ">>> [WARN] Python not found on PATH; skipped initial skill index build (it will auto-build on first search)." -ForegroundColor Yellow
+}
+
 Write-Host ">>> [SUCCESS] Installation completed successfully!" -ForegroundColor Green
-Write-Host ">>> Antigravity will now automatically enforce budget guards & concurrency rules globally." -ForegroundColor Green
+Write-Host ">>> Antigravity will now automatically enforce budget guards, concurrency rules, and zero-bloat skill routing globally." -ForegroundColor Green
